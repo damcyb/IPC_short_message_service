@@ -56,6 +56,12 @@ struct SignInToGroupStatus {
 };
 typedef struct SignInToGroupStatus SignInToGroupStatus;
 
+struct SignOutFromGroupStatus {
+    long type;
+    int result;
+};
+typedef struct SignOutFromGroupStatus SignOutFromGroupStatus;
+
 struct pollfd clientPoll = {
         STDIN_FILENO,
         POLLIN | POLLPRI

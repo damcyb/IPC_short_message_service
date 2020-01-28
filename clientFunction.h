@@ -152,7 +152,36 @@ void signInToGroupRequest() {
             printf("Failure, you have already been a member of chosen group\n");
         }
     }
+}
 
+void signOutFromGroupRequest() {
+    int choice = 0;
+    while(choice != 1 && choice != 2 && choice != 3) {
+        showGroupInfo();
+        choice = chooseAction();
+    }
+    int bridge = msgget(0x600, 0);
+    Group chosenGroup;
+    chosenGroup.id = choice;
+    user.type = 12;
+    chosenGroup.type = 14;
+
+    msgsnd(bridge, &user, sizeof(user) - sizeof(long), 0);
+    msgsnd(bridge, &chosenGroup, sizeof(chosenGroup) - sizeof(long), 0);
+    sleep(1);
+    SignOutFromGroupStatus signOutFromGroupStatus;
+    int received = msgrcv(bridge, &signOutFromGroupStatus, sizeof(signOutFromGroupStatus) - sizeof(long), 15, 0);
+    if(received == -1) {
+        perror("Error: ");
+    }
+    else {
+        if(signOutFromGroupStatus.result) {
+            printf("Success, you signed out from chosen group\n");
+        }
+        else {
+            printf("Failure, you have already been out of chosen group\n");
+        }
+    }
 }
 
 #endif

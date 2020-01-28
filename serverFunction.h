@@ -90,7 +90,7 @@ void showListOfLoggedUsers() {
     int receivedRequest  = msgrcv(internalRequestQueue, &user, sizeof(user) - sizeof(long), 4, IPC_NOWAIT);
 
     if(receivedRequest == -1) {
-        perror("Error: ");
+        //perror("Error: ");
     }
     else {
         LoggedUsers loggedUsers;
@@ -122,7 +122,7 @@ void showListOfExistingGroups() {
     int internalRequestQueue = msgget(0x600, 0666);
     int receivedRequest  = msgrcv(internalRequestQueue, &user, sizeof(user) - sizeof(long), 6, IPC_NOWAIT);
     if(receivedRequest == -1) {
-        perror("Error: ");
+        //perror("Error: ");
     }
     else {
         ExistingGroups existingGroups;
@@ -159,10 +159,10 @@ void signInToGroup() {
     int receivedUserRequest  = msgrcv(internalRequestQueue, &user, sizeof(user) - sizeof(long), 8, IPC_NOWAIT);
     int receivedGroupRequest = msgrcv(internalRequestQueue, &group, sizeof(group) - sizeof(long), 10, IPC_NOWAIT);
     if(receivedUserRequest == -1) {
-        perror("User error: ");
+        //perror("User error: ");
     }
     else if(receivedGroupRequest == -1) {
-        perror("Group error: ");
+        //perror("Group error: ");
     }
     else {
         SignInToGroupStatus signInToGroupStatus;
@@ -175,6 +175,49 @@ void signInToGroup() {
             signInToGroupStatus.result = 0;
         }
         int send = msgsnd(internalRequestQueue, &signInToGroupStatus, sizeof(signInToGroupStatus) - sizeof(long), 0);
+        if(send == -1) {
+            perror("Error ");
+        }
+        printf("%d\n", send);
+    }
+}
+
+int validateSignOutFromGroup(User user, Group group) {
+    if(groups[group.id - 1].members[user.id - 1] == 1) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+void removeUserFromGroup(User user, Group group) {
+    groups[group.id -1].members[user.id - 1] = 0;
+    printf("User %s removed from group %s", user.login, groups[group.id - 1].name);
+}
+
+void signOutFromGroup() {
+    User user;
+    Group group;
+    int internalRequestQueue = msgget(0x600, 0666);
+    int receivedUserRequest  = msgrcv(internalRequestQueue, &user, sizeof(user) - sizeof(long), 12, IPC_NOWAIT);
+    int receivedGroupRequest = msgrcv(internalRequestQueue, &group, sizeof(group) - sizeof(long), 14, IPC_NOWAIT);
+    if(receivedUserRequest == -1) {
+        //perror("User error: ");
+    }
+    else if(receivedGroupRequest == -1) {
+        //perror("Group error: ");
+    }
+    else {
+        SignOutFromGroupStatus signOutFromGroupStatus;
+        signOutFromGroupStatus.type = 15;
+        if(validateSignOutFromGroup(user, group)) {
+            removeUserFromGroup(user, group);
+            signOutFromGroupStatus.result = 1;
+        }
+        else {
+            signOutFromGroupStatus.result = 0;
+        }
+        int send = msgsnd(internalRequestQueue, &signOutFromGroupStatus, sizeof(signOutFromGroupStatus) - sizeof(long), 0);
         if(send == -1) {
             perror("Error ");
         }

@@ -33,6 +33,7 @@ int main() {
         showListOfLoggedUsers();
         showListOfExistingGroups();
         signInToGroup();
+        signOutFromGroup();
         sleep(1);
     }
 //    struct message msg;
