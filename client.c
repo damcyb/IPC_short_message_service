@@ -53,6 +53,10 @@ int main() {
                 showListOfGroupsRequest();
             }
 
+            else if(!strcmp(keyboardInput, "4")) {
+                signInToGroupRequest();
+            }
+
 //            if(!strcmp(keyboardInput, "9")) {
 //                printf("logout\n");
 //                //logoutUserRequest();

@@ -32,6 +32,7 @@ int main() {
         loginUser();
         showListOfLoggedUsers();
         showListOfExistingGroups();
+        signInToGroup();
         sleep(1);
     }
 //    struct message msg;

@@ -139,6 +139,49 @@ void showListOfExistingGroups() {
     }
 }
 
+int validateSignInToGroup(User user, Group group) {
+    if(groups[group.id - 1].members[user.id - 1] == 0) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+void addUserToGroup(User user, Group group) {
+    groups[group.id -1].members[user.id - 1] = 1;
+    printf("User %s added to group %s", user.login, groups[group.id - 1].name);
+}
+
+void signInToGroup() {
+    User user;
+    Group group;
+    int internalRequestQueue = msgget(0x600, 0666);
+    int receivedUserRequest  = msgrcv(internalRequestQueue, &user, sizeof(user) - sizeof(long), 8, IPC_NOWAIT);
+    int receivedGroupRequest = msgrcv(internalRequestQueue, &group, sizeof(group) - sizeof(long), 10, IPC_NOWAIT);
+    if(receivedUserRequest == -1) {
+        perror("User error: ");
+    }
+    else if(receivedGroupRequest == -1) {
+        perror("Group error: ");
+    }
+    else {
+        SignInToGroupStatus signInToGroupStatus;
+        signInToGroupStatus.type = 11;
+        if(validateSignInToGroup(user, group)) {
+            addUserToGroup(user, group);
+            signInToGroupStatus.result = 1;
+        }
+        else {
+            signInToGroupStatus.result = 0;
+        }
+        int send = msgsnd(internalRequestQueue, &signInToGroupStatus, sizeof(signInToGroupStatus) - sizeof(long), 0);
+        if(send == -1) {
+            perror("Error ");
+        }
+        printf("%d\n", send);
+    }
+}
+
 void readUserDataFromFile() {
     FILE * stream;
     stream = fopen("users.txt", "r");

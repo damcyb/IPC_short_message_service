@@ -50,6 +50,12 @@ struct ExistingGroups {
 };
 typedef struct ExistingGroups ExistingGroups;
 
+struct SignInToGroupStatus {
+    long type;
+    int result;
+};
+typedef struct SignInToGroupStatus SignInToGroupStatus;
+
 struct pollfd clientPoll = {
         STDIN_FILENO,
         POLLIN | POLLPRI

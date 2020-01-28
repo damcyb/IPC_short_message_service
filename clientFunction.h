@@ -111,4 +111,48 @@ void showListOfGroupsRequest() {
     }
 }
 
+void showGroupInfo() {
+    printf("Choose group you want to sign in\n"
+           "1 - Sport\n"
+           "2 - Politics\n"
+           "3 - Business\n");
+}
+
+int chooseAction() {
+    int chosenGroup;
+    scanf("%d", &chosenGroup);
+    return chosenGroup;
+}
+
+void signInToGroupRequest() {
+    int choice = 0;
+    while(choice != 1 && choice != 2 && choice != 3) {
+        showGroupInfo();
+        choice = chooseAction();
+    }
+    int bridge = msgget(0x600, 0);
+    Group chosenGroup;
+    chosenGroup.id = choice;
+    user.type = 8;
+    chosenGroup.type = 10;
+
+    msgsnd(bridge, &user, sizeof(user) - sizeof(long), 0);
+    msgsnd(bridge, &chosenGroup, sizeof(chosenGroup) - sizeof(long), 0);
+    sleep(1);
+    SignInToGroupStatus signInToGroupStatus;
+    int received = msgrcv(bridge, &signInToGroupStatus, sizeof(signInToGroupStatus) - sizeof(long), 11, 0);
+    if(received == -1) {
+        perror("Error: ");
+    }
+    else {
+        if(signInToGroupStatus.result) {
+            printf("Success, now you are a member of chosen group\n");
+        }
+        else {
+            printf("Failure, you have already been a member of chosen group\n");
+        }
+    }
+
+}
+
 #endif
