@@ -21,16 +21,17 @@
 
 int main() {
 
-    int request_queue = msgget(0x500, 0666 | IPC_CREAT);
-    int receive_queue = msgget(0x501, 0666 | IPC_CREAT);
-    int send_queue = msgget(0x502, 0666 | IPC_CREAT);
+    int request_queue = msgget(0x600, 0666 | IPC_CREAT);
+    int receive_queue = msgget(0x601, 0666 | IPC_CREAT);
+    int send_queue = msgget(0x602, 0666 | IPC_CREAT);
 
     readUserDataFromFile();
-    //loginUser();
+    readGroups();
 
     while(True) {
         loginUser();
         showListOfLoggedUsers();
+        showListOfExistingGroups();
         sleep(1);
     }
 //    struct message msg;

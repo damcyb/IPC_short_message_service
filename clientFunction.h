@@ -15,13 +15,14 @@
 #define SERVER_FUNCTION_H
 
 #define NUMBER_OF_USERS 3
+#define NUMBER_OF_GROUPS 3
 
 User user;
 
 void showOptions() {
     printf("Enter a number to do something: \n"
            "1 - SHOW LIST OF LOGGED USERS\n"
-           "2 - SHOW OF USERS IN YOUR GROUP\n"
+           "2 - SHOW ALL USERS IN YOUR GROUP\n"
            "3 - SHOW LIST OF GROUPS\n"
            "4 - SIGN IN TO GROUP\n"
            "5 - SIGN OUT FROM GROUP\n"
@@ -54,7 +55,7 @@ LoginUserDetailsRequestModel inputLoginData() {
 
 void loginUserRequest(LoginUserDetailsRequestModel loginUserDetails) {
 
-    int bridge = msgget(0x500, 0666);
+    int bridge = msgget(0x600, 0666);
     loginUserDetails.type = 2;
     msgsnd(bridge, &loginUserDetails, sizeof(LoginUserDetailsRequestModel) - sizeof(long), 0);
     //sleep(1);
@@ -72,7 +73,7 @@ void loginUserRequest(LoginUserDetailsRequestModel loginUserDetails) {
 }
 
 void showLoggedUsersRequest() {
-    int bridge = msgget(0x500, 0);
+    int bridge = msgget(0x600, 0);
     user.type = 4;
 
     msgsnd(bridge, &user, sizeof(user) - sizeof(long), 0);
@@ -85,6 +86,27 @@ void showLoggedUsersRequest() {
     else {
         for(int i = 0; i < loggedUsers.number; i++) {
             printf("%s\n", loggedUsers.login[i]);
+        }
+    }
+}
+
+void showListOfGroupsRequest() {
+    int bridge = msgget(0x600, 0);
+    user.type = 6;
+
+    int send = msgsnd(bridge, &user, sizeof(user) - sizeof(long), 0);
+    if(send == -1) {
+        perror("Send Error: ");
+    }
+    sleep(1);
+    ExistingGroups existingGroups;
+    int received = msgrcv(bridge, &existingGroups, sizeof(existingGroups) - sizeof(long), 7, 0);
+    if(received == -1) {
+        perror("Error: ");
+    }
+    else {
+        for(int i = 0; i < NUMBER_OF_GROUPS; i++) {
+            printf("%s\n", existingGroups.name[i]);
         }
     }
 }

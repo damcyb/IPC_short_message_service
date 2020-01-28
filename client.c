@@ -45,6 +45,14 @@ int main() {
                 showLoggedUsersRequest();
             }
 
+            else if(!strcmp(keyboardInput, "2")) {
+                //showUsersInGroupRequest();
+            }
+
+            else if(!strcmp(keyboardInput, "3")) {
+                showListOfGroupsRequest();
+            }
+
 //            if(!strcmp(keyboardInput, "9")) {
 //                printf("logout\n");
 //                //logoutUserRequest();

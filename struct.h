@@ -4,6 +4,8 @@
 #define STRUCT_H
 
 #define MESSAGE_MAX_LENGTH 1000
+#define NUMBER_OF_USERS 3
+#define NUMBER_OF_GROUPS 3
 
 struct Message {
     long type;
@@ -29,11 +31,24 @@ typedef struct User User;
 
 struct LoggedUsers {
     long type;
-    char login[3][50];
+    char login[NUMBER_OF_USERS][50];
     int number;
-
 };
 typedef struct LoggedUsers LoggedUsers;
+
+struct Group {
+    long type;
+    int id;
+    char name[100];
+    int members[NUMBER_OF_USERS];
+};
+typedef struct Group Group;
+
+struct ExistingGroups {
+    long type;
+    char name[NUMBER_OF_GROUPS][50];
+};
+typedef struct ExistingGroups ExistingGroups;
 
 struct pollfd clientPoll = {
         STDIN_FILENO,

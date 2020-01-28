@@ -15,15 +15,15 @@
 #define SERVER_FUNCTION_H
 
 #define NUMBER_OF_USERS 3
+#define NUMBER_OF_GROUPS 3
 
 User users[NUMBER_OF_USERS];
+Group groups[NUMBER_OF_GROUPS];
 
 int validateLogin(User user) {
     for(int i = 0; i < NUMBER_OF_USERS; i++) {
         if(!strcmp(user.login, users[i].login) && !strcmp(user.password, users[i].password)) {
             users[i].logStatus = 1;
-//            printf("User id: %d\n", users[i].id);
-//            printf("Login status: %d\n", users[i].logStatus);
             return users[i].id;
         }
     }
@@ -35,7 +35,7 @@ void loginUser() {
     LoginUserDetailsRequestModel loginUserDetailsRequestModel;
     User user;
 
-    int internalRequestQueue = msgget(0x500, 0666);
+    int internalRequestQueue = msgget(0x600, 0666);
     int receivedRequest  = msgrcv(internalRequestQueue, &loginUserDetailsRequestModel,
             sizeof(loginUserDetailsRequestModel) - sizeof(long), 2, IPC_NOWAIT);
     if(receivedRequest == -1) {
@@ -86,8 +86,7 @@ int countNumberOfLoggedUsers() {
 void showListOfLoggedUsers() {
     LoggedUsers loggedUsers;
     User user;
-
-    int internalRequestQueue = msgget(0x500, 0666);
+    int internalRequestQueue = msgget(0x600, 0666);
     int receivedRequest  = msgrcv(internalRequestQueue, &user, sizeof(user) - sizeof(long), 4, IPC_NOWAIT);
 
     if(receivedRequest == -1) {
@@ -109,6 +108,37 @@ void showListOfLoggedUsers() {
     }
 }
 
+ExistingGroups createListOfExistingGroups() {
+    ExistingGroups existingGroups;
+    for(int i = 0; i < NUMBER_OF_GROUPS; i++) {
+        strcpy(existingGroups.name[i], groups[i].name);
+    }
+    return existingGroups;
+
+}
+
+void showListOfExistingGroups() {
+    User user;
+    int internalRequestQueue = msgget(0x600, 0666);
+    int receivedRequest  = msgrcv(internalRequestQueue, &user, sizeof(user) - sizeof(long), 6, IPC_NOWAIT);
+    if(receivedRequest == -1) {
+        perror("Error: ");
+    }
+    else {
+        ExistingGroups existingGroups;
+        existingGroups = createListOfExistingGroups();
+        existingGroups.type = 7;
+        int send = msgsnd(internalRequestQueue, &existingGroups, sizeof(existingGroups) - sizeof(long), 0);
+        if(send == -1) {
+            perror("Error ");
+        }
+        printf("%d\n", send);
+        for(int i = 0; i < NUMBER_OF_GROUPS; i++) {
+            printf("%s\n", existingGroups.name[i]);
+        }
+    }
+}
+
 void readUserDataFromFile() {
     FILE * stream;
     stream = fopen("users.txt", "r");
@@ -118,6 +148,15 @@ void readUserDataFromFile() {
         fscanf(stream, "%s", users[i].password);
     }
     fclose(stream);
+}
+
+void readGroups() {
+    groups[0].id = 1;
+    strcpy(groups[0].name, "Sport");
+    groups[1].id = 2;
+    strcpy(groups[1].name, "Politics");
+    groups[2].id = 3;
+    strcpy(groups[2].name, "Business");
 }
 
 #endif
