@@ -22,7 +22,7 @@ int queue[3];
 
 int main() {
 
-    printf("Server started...\n");
+    printf("Server is running...\n");
 
     request_queue = msgget(0x200, 0666 | IPC_CREAT);
     receive_queue = msgget(0x201, 0666 | IPC_CREAT);
@@ -44,6 +44,7 @@ int main() {
         signInToGroup();
         signOutFromGroup();
         showUsersInGroup();
+        logoutUser();
         sleep(1);
     }
 //    struct message msg;

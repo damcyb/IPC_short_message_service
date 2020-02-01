@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <stdlib.h>
 #include "struct.h"
 
 #ifndef SERVER_FUNCTION_H
@@ -194,6 +195,27 @@ void showUsersInGroupRequest() {
     printf("%s", groupPoliticsMembers.login);
     printf("Users signed in to Business group: \n");
     printf("%s", groupBusinessMembers.login);
+}
+
+void logoutUserRequest() {
+    int bridge = msgget(0x200, 0);
+    user.type = 20;
+    msgsnd(bridge, &user, sizeof(user) - sizeof(long), 0);
+    sleep(1);
+    int received = msgrcv(bridge, &user, sizeof(user) - sizeof(long), 21, 0);
+    if(received == -1) {
+        perror("Error: ");
+    }
+    else {
+        if(user.logStatus == 0) {
+            printf("User logged out.\n");
+            exit(0);
+        }
+        else {
+            printf("Logout unsuccessful\n");
+            exit(-1);
+        }
+    }
 }
 
 

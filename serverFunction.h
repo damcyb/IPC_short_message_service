@@ -278,6 +278,38 @@ void showUsersInGroup() {
     }
 }
 
+int validateLogout(User user) {
+    for(int i = 0; i < NUMBER_OF_USERS; i++) {
+        if(!strcmp(user.login, users[i].login) && !strcmp(user.password, users[i].password)) {
+            users[i].logStatus = 0;
+            return users[i].id;
+        }
+    }
+    return -1;
+}
+
+void logoutUser() {
+    User user;
+    int logoutSuccessful = 0;
+    int internalRequestQueue = msgget(0x200, 0666);
+    int receivedUserRequest  = msgrcv(internalRequestQueue, &user, sizeof(user) - sizeof(long), 20, IPC_NOWAIT);
+    if(receivedUserRequest == -1) {
+        //perror("Error: ");
+    }
+    else {
+        if(validateLogout(user) != -1) {
+            user.logStatus = 0;
+            logoutSuccessful = 1;
+            printf("Logout successful\n");
+        }
+        else {
+            printf("Logout unsuccessful\n");
+        }
+        user.type = 21;
+        msgsnd(internalRequestQueue, &user, sizeof(user) - sizeof(long), 0);
+    }
+}
+
 void readUserDataFromFile() {
     FILE * stream;
     stream = fopen("users.txt", "r");

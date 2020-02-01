@@ -61,10 +61,9 @@ int main() {
                 signOutFromGroupRequest();
             }
 
-//            if(!strcmp(keyboardInput, "9")) {
-//                printf("logout\n");
-//                //logoutUserRequest();
-//            }
+            else if(!strcmp(keyboardInput, "9")) {
+                logoutUserRequest();
+            }
         }
     }
 
