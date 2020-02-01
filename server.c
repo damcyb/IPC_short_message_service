@@ -8,6 +8,12 @@
 #include <sys/msg.h>
 #include <errno.h>
 #include <sys/wait.h>
+
+int request_queue;
+int receive_queue;
+int send_queue;
+int queue[3];
+
 #include "struct.h"
 #include "serverFunction.h"
 
@@ -19,11 +25,18 @@
 //    char text[100];
 //};
 
+
 int main() {
 
-    int request_queue = msgget(0x600, 0666 | IPC_CREAT);
-    int receive_queue = msgget(0x601, 0666 | IPC_CREAT);
-    int send_queue = msgget(0x602, 0666 | IPC_CREAT);
+    request_queue = msgget(0x200, 0666 | IPC_CREAT);
+    receive_queue = msgget(0x201, 0666 | IPC_CREAT);
+    send_queue = msgget(0x202, 0666 | IPC_CREAT);
+
+    queue[0] = request_queue;
+    queue[1] = receive_queue;
+    queue[2] = send_queue;
+
+    signal(2, closeQueues);
 
     readUserDataFromFile();
     readGroups();
@@ -31,6 +44,7 @@ int main() {
     while(True) {
         loginUser();
         showListOfLoggedUsers();
+        showUsersInGroup();
         showListOfExistingGroups();
         signInToGroup();
         signOutFromGroup();

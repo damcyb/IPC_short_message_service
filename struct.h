@@ -62,6 +62,13 @@ struct SignOutFromGroupStatus {
 };
 typedef struct SignOutFromGroupStatus SignOutFromGroupStatus;
 
+struct GroupMembers {
+    long type;
+    char login[NUMBER_OF_USERS][250];
+    int number;
+};
+typedef struct GroupMembers GroupMembers;
+
 struct pollfd clientPoll = {
         STDIN_FILENO,
         POLLIN | POLLPRI

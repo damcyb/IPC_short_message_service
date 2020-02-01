@@ -55,7 +55,7 @@ LoginUserDetailsRequestModel inputLoginData() {
 
 void loginUserRequest(LoginUserDetailsRequestModel loginUserDetails) {
 
-    int bridge = msgget(0x600, 0666);
+    int bridge = msgget(0x200, 0666);
     loginUserDetails.type = 2;
     msgsnd(bridge, &loginUserDetails, sizeof(LoginUserDetailsRequestModel) - sizeof(long), 0);
     //sleep(1);
@@ -73,7 +73,7 @@ void loginUserRequest(LoginUserDetailsRequestModel loginUserDetails) {
 }
 
 void showLoggedUsersRequest() {
-    int bridge = msgget(0x600, 0);
+    int bridge = msgget(0x200, 0);
     user.type = 4;
 
     msgsnd(bridge, &user, sizeof(user) - sizeof(long), 0);
@@ -91,7 +91,7 @@ void showLoggedUsersRequest() {
 }
 
 void showListOfGroupsRequest() {
-    int bridge = msgget(0x600, 0);
+    int bridge = msgget(0x200, 0);
     user.type = 6;
 
     int send = msgsnd(bridge, &user, sizeof(user) - sizeof(long), 0);
@@ -130,7 +130,7 @@ void signInToGroupRequest() {
         showGroupInfo();
         choice = chooseAction();
     }
-    int bridge = msgget(0x600, 0);
+    int bridge = msgget(0x200, 0);
     Group chosenGroup;
     chosenGroup.id = choice;
     user.type = 8;
@@ -160,7 +160,7 @@ void signOutFromGroupRequest() {
         showGroupInfo();
         choice = chooseAction();
     }
-    int bridge = msgget(0x600, 0);
+    int bridge = msgget(0x200, 0);
     Group chosenGroup;
     chosenGroup.id = choice;
     user.type = 12;
@@ -183,5 +183,36 @@ void signOutFromGroupRequest() {
         }
     }
 }
+
+void showUsersInGroupRequest() {
+    int bridge = msgget(0x200, 0);
+    user.type = 16;
+    msgsnd(bridge, &user, sizeof(user) - sizeof(long), 0);
+    sleep(1);
+
+    GroupMembers groupSportMembers;
+//    GroupMembers groupPoliticsMembers;
+//    GroupMembers groupBusinessMembers;
+
+    msgrcv(bridge, &groupSportMembers, sizeof(groupSportMembers) - sizeof(long), 17, 0);
+//    msgrcv(bridge, &groupPoliticsMembers, sizeof(groupPoliticsMembers) - sizeof(long), 18, 0);
+//    msgrcv(bridge, &groupBusinessMembers, sizeof(groupBusinessMembers) - sizeof(long), 19, 0);
+
+    printf("Users signed in to Sport group: \n\t");
+    for(int i = 0; i < groupSportMembers.number; i++) {
+            printf("%s\n", groupSportMembers.login[i]);
+    }
+//    printf("Users signed in to Politics group: \n\t");
+//    for(int i = 0; i < groupPoliticsMembers.number; i++) {
+//        printf("%s\n", groupPoliticsMembers.login[i]);
+//    }
+//    printf("Users signed in to Business group: \n\t");
+//    for(int i = 0; i < groupBusinessMembers.number; i++) {
+//        printf("%s\n", groupBusinessMembers.login[i]);
+//    }
+}
+
+
+
 
 #endif

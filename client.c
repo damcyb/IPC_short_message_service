@@ -45,9 +45,9 @@ int main() {
                 showLoggedUsersRequest();
             }
 
-            else if(!strcmp(keyboardInput, "2")) {
-                //showUsersInGroupRequest();
-            }
+//            else if(!strcmp(keyboardInput, "2")) {
+//                showUsersInGroupRequest();
+//            }
 
             else if(!strcmp(keyboardInput, "3")) {
                 showListOfGroupsRequest();

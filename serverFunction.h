@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <poll.h>
@@ -20,6 +21,17 @@
 User users[NUMBER_OF_USERS];
 Group groups[NUMBER_OF_GROUPS];
 
+void closeQueues(int signal) {
+    for (int i = 0; i < 3; i++) {
+        msgctl(queue[i], IPC_RMID, NULL);
+    }
+//    for (int i = 0; i < 16; i++) {
+//        int mid = msgget(0x200 + i, 0);
+//        msgctl(mid, IPC_RMID, NULL);
+//    }
+    exit(0);
+}
+
 int validateLogin(User user) {
     for(int i = 0; i < NUMBER_OF_USERS; i++) {
         if(!strcmp(user.login, users[i].login) && !strcmp(user.password, users[i].password)) {
@@ -35,7 +47,7 @@ void loginUser() {
     LoginUserDetailsRequestModel loginUserDetailsRequestModel;
     User user;
 
-    int internalRequestQueue = msgget(0x600, 0666);
+    int internalRequestQueue = msgget(0x200, 0666);
     int receivedRequest  = msgrcv(internalRequestQueue, &loginUserDetailsRequestModel,
             sizeof(loginUserDetailsRequestModel) - sizeof(long), 2, IPC_NOWAIT);
     if(receivedRequest == -1) {
@@ -86,7 +98,7 @@ int countNumberOfLoggedUsers() {
 void showListOfLoggedUsers() {
     LoggedUsers loggedUsers;
     User user;
-    int internalRequestQueue = msgget(0x600, 0666);
+    int internalRequestQueue = msgget(0x200, 0666);
     int receivedRequest  = msgrcv(internalRequestQueue, &user, sizeof(user) - sizeof(long), 4, IPC_NOWAIT);
 
     if(receivedRequest == -1) {
@@ -119,7 +131,7 @@ ExistingGroups createListOfExistingGroups() {
 
 void showListOfExistingGroups() {
     User user;
-    int internalRequestQueue = msgget(0x600, 0666);
+    int internalRequestQueue = msgget(0x200, 0666);
     int receivedRequest  = msgrcv(internalRequestQueue, &user, sizeof(user) - sizeof(long), 6, IPC_NOWAIT);
     if(receivedRequest == -1) {
         //perror("Error: ");
@@ -155,7 +167,7 @@ void addUserToGroup(User user, Group group) {
 void signInToGroup() {
     User user;
     Group group;
-    int internalRequestQueue = msgget(0x600, 0666);
+    int internalRequestQueue = msgget(0x200, 0666);
     int receivedUserRequest  = msgrcv(internalRequestQueue, &user, sizeof(user) - sizeof(long), 8, IPC_NOWAIT);
     int receivedGroupRequest = msgrcv(internalRequestQueue, &group, sizeof(group) - sizeof(long), 10, IPC_NOWAIT);
     if(receivedUserRequest == -1) {
@@ -198,7 +210,7 @@ void removeUserFromGroup(User user, Group group) {
 void signOutFromGroup() {
     User user;
     Group group;
-    int internalRequestQueue = msgget(0x600, 0666);
+    int internalRequestQueue = msgget(0x200, 0666);
     int receivedUserRequest  = msgrcv(internalRequestQueue, &user, sizeof(user) - sizeof(long), 12, IPC_NOWAIT);
     int receivedGroupRequest = msgrcv(internalRequestQueue, &group, sizeof(group) - sizeof(long), 14, IPC_NOWAIT);
     if(receivedUserRequest == -1) {
@@ -223,6 +235,45 @@ void signOutFromGroup() {
         }
         printf("%d\n", send);
     }
+}
+
+GroupMembers findGroupMembers(int members[NUMBER_OF_USERS]) {
+    GroupMembers groupMembers;
+    int iterator = 0;
+    for(int i = 0; i < NUMBER_OF_USERS; i++) {
+        if(members[i] == 1) {
+            strcpy(groupMembers.login[iterator], users[i].login);
+            iterator++;
+        }
+    }
+    groupMembers.number = iterator;
+    return groupMembers;
+}
+
+void showUsersInGroup() {
+    User user;
+    int internalRequestQueue = msgget(0x200, 0666);
+    int receivedUserRequest  = msgrcv(internalRequestQueue, &user, sizeof(user) - sizeof(long), 16, IPC_NOWAIT);
+
+    GroupMembers groupSportMembers;
+//    GroupMembers groupPoliticsMembers;
+//    GroupMembers groupBusinessMembers;
+
+    groupSportMembers = findGroupMembers(groups[0].members);
+//    groupPoliticsMembers = findGroupMembers(groups[1].members);
+//    groupBusinessMembers = findGroupMembers(groups[2].members);
+
+    groupSportMembers.type = 17;
+//    groupPoliticsMembers.type = 18;
+//    groupBusinessMembers.type = 19;
+
+    int send = msgsnd(internalRequestQueue, &groupSportMembers, sizeof(groupSportMembers) - sizeof(long), 0);
+    printf("%d\n", send);
+//    msgsnd(internalRequestQueue, &groupPoliticsMembers, sizeof(groupPoliticsMembers) - sizeof(long), 0);
+//    msgsnd(internalRequestQueue, &groupBusinessMembers, sizeof(groupBusinessMembers) - sizeof(long), 0);
+
+    printf("Members lists sent\n");
+
 }
 
 void readUserDataFromFile() {
