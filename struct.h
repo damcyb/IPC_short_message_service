@@ -31,7 +31,6 @@ typedef struct User User;
 
 struct LoggedUsers {
     long type;
-    //char login[NUMBER_OF_USERS][50];
     char login[900];
     int number;
 };
@@ -47,7 +46,6 @@ typedef struct Group Group;
 
 struct ExistingGroups {
     long type;
-    //char name[NUMBER_OF_GROUPS][50];
     char name[150];
 };
 typedef struct ExistingGroups ExistingGroups;
@@ -70,6 +68,13 @@ struct GroupMembers {
     int number;
 };
 typedef struct GroupMembers GroupMembers;
+
+struct UserFoundResponse {
+    long type;
+    int isFound;
+    int id;
+};
+typedef struct UserFoundResponse UserFoundResponse;
 
 struct pollfd clientPoll = {
         STDIN_FILENO,

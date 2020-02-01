@@ -218,6 +218,45 @@ void logoutUserRequest() {
     }
 }
 
+void writeMessageToUser() {
+    int bridge = msgget(0x200, 0);
+    int msgBridge = msgget(0x201, 0);
+    user.type = 22;
+    User receiver;
+    receiver.type = 24;
+    msgsnd(bridge, &user, sizeof(user) - sizeof(long), 0);
+
+    UserFoundResponse userFoundResponse;
+    userFoundResponse.isFound = 0;
+    while (userFoundResponse.isFound <= 0) {
+        printf("Type receiver's login: \n");
+        scanf("%s", receiver.login);
+        msgsnd(bridge, &receiver, sizeof(receiver) - sizeof(long), 0);
+        int received = msgrcv(bridge, &userFoundResponse, sizeof(userFoundResponse) - sizeof(long), 25, 0);
+        sleep(1);
+        if(userFoundResponse.isFound == 1) {
+            printf("Found\n");
+        }
+        else if(userFoundResponse.isFound == 0) {
+            printf("Writing messages to yourself is unavailable\n");
+        }
+        else {
+            printf("Not found\n");
+        }
+    }
+    if(userFoundResponse.isFound == 1) {
+        Message message;
+        message.type = 26;
+        printf("Type your message to %s, when you want to exit writing mode type \"quit\" and press enter \n", receiver.login);
+        strcpy(message.text, "");
+        while(strcmp(message.text, "quit")) {
+            scanf("%s", message.text);
+            msgsnd(msgBridge, &message, sizeof(message) - sizeof(long), 0);
+        }
+    }
+
+}
+
 
 
 

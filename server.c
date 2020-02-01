@@ -44,6 +44,8 @@ int main() {
         signInToGroup();
         signOutFromGroup();
         showUsersInGroup();
+        userToUserValidator();
+        userToUserMessage();
         logoutUser();
         sleep(1);
     }

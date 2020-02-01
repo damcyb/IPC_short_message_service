@@ -310,6 +310,65 @@ void logoutUser() {
     }
 }
 
+int validateReceiver(User sender, User receiver) {
+    if(!strcmp(sender.login, receiver.login)) {
+        return 0;
+    }
+    for(int i = 0; i < NUMBER_OF_USERS; i++) {
+        if(!strcmp(receiver.login, users[i].login)) {
+            return users[i].id;
+        }
+    }
+    return -1;
+}
+
+void userToUserValidator() {
+    User receiver;
+    User sender;
+    int internalRequestQueue = msgget(0x200, 0666);
+    int receivedSenderData = msgrcv(internalRequestQueue, &sender, sizeof(sender) - sizeof(long), 22, IPC_NOWAIT);
+    if(receivedSenderData == -1) {
+        //perror("Error: ");
+    }
+    int receivedUserRequest  = msgrcv(internalRequestQueue, &receiver, sizeof(receiver) - sizeof(long), 24, IPC_NOWAIT);
+    if(receivedUserRequest == -1) {
+        //perror("Error: ");
+    }
+    else {
+        UserFoundResponse userFoundResponse;
+        userFoundResponse.type = 25;
+        int validationCode = validateReceiver(sender, receiver);
+        if(validationCode > 0) {
+            userFoundResponse.isFound = 1;
+            userFoundResponse.id = validationCode;
+            printf("Successful request\n");
+        }
+        else if(validationCode == 0) {
+            userFoundResponse.isFound = 0;
+            userFoundResponse.id = -1;
+            printf("Unsuccessful request\n");
+        }
+        else {
+            userFoundResponse.isFound = -1;
+            userFoundResponse.id = -1;
+            printf("Unsuccessful request\n");
+        }
+        msgsnd(internalRequestQueue, &userFoundResponse, sizeof(userFoundResponse) - sizeof(long), 0);
+    }
+}
+
+void userToUserMessage() {
+    int internalReceive_Queue = msgget(0x201, 0666);
+    Message message;
+    int receivedMessage = msgrcv(internalReceive_Queue, &message, sizeof(message) - sizeof(long), 26, IPC_NOWAIT);
+    if(receivedMessage == -1) {
+        //perror("Error: ");
+    }
+    else {
+        printf("%s\n", message.text);
+    }
+}
+
 void readUserDataFromFile() {
     FILE * stream;
     stream = fopen("users.txt", "r");
