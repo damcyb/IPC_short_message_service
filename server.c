@@ -20,13 +20,9 @@ int queue[3];
 #define True 1
 #define False 0
 
-//struct message {
-//    long type;
-//    char text[100];
-//};
-
-
 int main() {
+
+    printf("Server started...\n");
 
     request_queue = msgget(0x200, 0666 | IPC_CREAT);
     receive_queue = msgget(0x201, 0666 | IPC_CREAT);
@@ -44,10 +40,10 @@ int main() {
     while(True) {
         loginUser();
         showListOfLoggedUsers();
-        showUsersInGroup();
         showListOfExistingGroups();
         signInToGroup();
         signOutFromGroup();
+        showUsersInGroup();
         sleep(1);
     }
 //    struct message msg;

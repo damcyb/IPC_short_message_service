@@ -75,11 +75,11 @@ void loginUser() {
 
 LoggedUsers createListOfLoggedUsers() {
     LoggedUsers loggedUsers;
-    int iterator = 0;
+    strcpy(loggedUsers.login, "");
     for(int i = 0; i < NUMBER_OF_USERS; i++) {
         if(users[i].logStatus == 1) {
-            strcpy(loggedUsers.login[iterator], users[i].login);
-            iterator++;
+            strcat(loggedUsers.login, users[i].login);
+            strcat(loggedUsers.login, "\n");
         }
     }
     return loggedUsers;
@@ -113,17 +113,16 @@ void showListOfLoggedUsers() {
         if(send == -1) {
             perror("Error ");
         }
-        printf("%d\n", send);
-        for(int i = 0; i < loggedUsers.number; i++) {
-            printf("%s\n", loggedUsers.login[i]);
-        }
+        printf("%s", loggedUsers.login);
     }
 }
 
 ExistingGroups createListOfExistingGroups() {
     ExistingGroups existingGroups;
+    strcpy(existingGroups.name, "");
     for(int i = 0; i < NUMBER_OF_GROUPS; i++) {
-        strcpy(existingGroups.name[i], groups[i].name);
+        strcat(existingGroups.name, groups[i].name);
+        strcat(existingGroups.name, "\n");
     }
     return existingGroups;
 
@@ -144,10 +143,7 @@ void showListOfExistingGroups() {
         if(send == -1) {
             perror("Error ");
         }
-        printf("%d\n", send);
-        for(int i = 0; i < NUMBER_OF_GROUPS; i++) {
-            printf("%s\n", existingGroups.name[i]);
-        }
+        printf("%s", existingGroups.name);
     }
 }
 
@@ -239,11 +235,13 @@ void signOutFromGroup() {
 
 GroupMembers findGroupMembers(int members[NUMBER_OF_USERS]) {
     GroupMembers groupMembers;
+    strcpy(groupMembers.login, "");
     int iterator = 0;
     for(int i = 0; i < NUMBER_OF_USERS; i++) {
         if(members[i] == 1) {
-            strcpy(groupMembers.login[iterator], users[i].login);
             iterator++;
+            strcat(groupMembers.login, users[i].login);
+            strcat(groupMembers.login, "\n");
         }
     }
     groupMembers.number = iterator;
@@ -254,26 +252,30 @@ void showUsersInGroup() {
     User user;
     int internalRequestQueue = msgget(0x200, 0666);
     int receivedUserRequest  = msgrcv(internalRequestQueue, &user, sizeof(user) - sizeof(long), 16, IPC_NOWAIT);
+    if(receivedUserRequest == -1) {
+        //perror("Error: ");
+    }
+    else {
+        GroupMembers groupSportMembers;
+        GroupMembers groupPoliticsMembers;
+        GroupMembers groupBusinessMembers;
 
-    GroupMembers groupSportMembers;
-//    GroupMembers groupPoliticsMembers;
-//    GroupMembers groupBusinessMembers;
+        groupSportMembers = findGroupMembers(groups[0].members);
+        groupPoliticsMembers = findGroupMembers(groups[1].members);
+        groupBusinessMembers = findGroupMembers(groups[2].members);
 
-    groupSportMembers = findGroupMembers(groups[0].members);
-//    groupPoliticsMembers = findGroupMembers(groups[1].members);
-//    groupBusinessMembers = findGroupMembers(groups[2].members);
+        groupSportMembers.type = 17;
+        groupPoliticsMembers.type = 18;
+        groupBusinessMembers.type = 19;
 
-    groupSportMembers.type = 17;
-//    groupPoliticsMembers.type = 18;
-//    groupBusinessMembers.type = 19;
+        msgsnd(internalRequestQueue, &groupSportMembers, sizeof(groupSportMembers) - sizeof(long), 0);
+        msgsnd(internalRequestQueue, &groupPoliticsMembers, sizeof(groupPoliticsMembers) - sizeof(long), 0);
+        msgsnd(internalRequestQueue, &groupBusinessMembers, sizeof(groupBusinessMembers) - sizeof(long), 0);
 
-    int send = msgsnd(internalRequestQueue, &groupSportMembers, sizeof(groupSportMembers) - sizeof(long), 0);
-    printf("%d\n", send);
-//    msgsnd(internalRequestQueue, &groupPoliticsMembers, sizeof(groupPoliticsMembers) - sizeof(long), 0);
-//    msgsnd(internalRequestQueue, &groupBusinessMembers, sizeof(groupBusinessMembers) - sizeof(long), 0);
-
-    printf("Members lists sent\n");
-
+        printf("%s", groupSportMembers.login);
+        printf("%s", groupPoliticsMembers.login);
+        printf("%s", groupBusinessMembers.login);
+    }
 }
 
 void readUserDataFromFile() {

@@ -22,7 +22,7 @@ User user;
 void showOptions() {
     printf("Enter a number to do something: \n"
            "1 - SHOW LIST OF LOGGED USERS\n"
-           "2 - SHOW ALL USERS IN YOUR GROUP\n"
+           "2 - SHOW LIST OF USERS IN GROUPS\n"
            "3 - SHOW LIST OF GROUPS\n"
            "4 - SIGN IN TO GROUP\n"
            "5 - SIGN OUT FROM GROUP\n"
@@ -30,16 +30,6 @@ void showOptions() {
            "7 - SEND A MESSAGE TO GROUP\n"
            "8 - READ MESSAGES\n"
            "9 - LOGOUT\n");
-
-    //show list of logged users
-    //show list of users in group
-    //show list of groups
-    //sign in to group
-    //sign out from group
-    //send a message to user
-    //send a message to group
-    //read messages
-    //logout
 }
 
 LoginUserDetailsRequestModel inputLoginData() {
@@ -58,7 +48,7 @@ void loginUserRequest(LoginUserDetailsRequestModel loginUserDetails) {
     int bridge = msgget(0x200, 0666);
     loginUserDetails.type = 2;
     msgsnd(bridge, &loginUserDetails, sizeof(LoginUserDetailsRequestModel) - sizeof(long), 0);
-    //sleep(1);
+//    sleep(1);
     //User user;
     int received = msgrcv(bridge, &user, sizeof(user) - sizeof(long), 3, 0);
     if(received == -1) {
@@ -74,6 +64,7 @@ void loginUserRequest(LoginUserDetailsRequestModel loginUserDetails) {
 
 void showLoggedUsersRequest() {
     int bridge = msgget(0x200, 0);
+
     user.type = 4;
 
     msgsnd(bridge, &user, sizeof(user) - sizeof(long), 0);
@@ -84,9 +75,7 @@ void showLoggedUsersRequest() {
         perror("Error: ");
     }
     else {
-        for(int i = 0; i < loggedUsers.number; i++) {
-            printf("%s\n", loggedUsers.login[i]);
-        }
+        printf("%s", loggedUsers.login);
     }
 }
 
@@ -105,9 +94,7 @@ void showListOfGroupsRequest() {
         perror("Error: ");
     }
     else {
-        for(int i = 0; i < NUMBER_OF_GROUPS; i++) {
-            printf("%s\n", existingGroups.name[i]);
-        }
+        printf("%s", existingGroups.name);
     }
 }
 
@@ -191,25 +178,22 @@ void showUsersInGroupRequest() {
     sleep(1);
 
     GroupMembers groupSportMembers;
-//    GroupMembers groupPoliticsMembers;
-//    GroupMembers groupBusinessMembers;
+    GroupMembers groupPoliticsMembers;
+    GroupMembers groupBusinessMembers;
 
-    msgrcv(bridge, &groupSportMembers, sizeof(groupSportMembers) - sizeof(long), 17, 0);
-//    msgrcv(bridge, &groupPoliticsMembers, sizeof(groupPoliticsMembers) - sizeof(long), 18, 0);
-//    msgrcv(bridge, &groupBusinessMembers, sizeof(groupBusinessMembers) - sizeof(long), 19, 0);
-
-    printf("Users signed in to Sport group: \n\t");
-    for(int i = 0; i < groupSportMembers.number; i++) {
-            printf("%s\n", groupSportMembers.login[i]);
+    int received = msgrcv(bridge, &groupSportMembers, sizeof(groupSportMembers) - sizeof(long), 17, 0);
+    if(received == -1) {
+        perror("Error: ");
     }
-//    printf("Users signed in to Politics group: \n\t");
-//    for(int i = 0; i < groupPoliticsMembers.number; i++) {
-//        printf("%s\n", groupPoliticsMembers.login[i]);
-//    }
-//    printf("Users signed in to Business group: \n\t");
-//    for(int i = 0; i < groupBusinessMembers.number; i++) {
-//        printf("%s\n", groupBusinessMembers.login[i]);
-//    }
+    msgrcv(bridge, &groupPoliticsMembers, sizeof(groupPoliticsMembers) - sizeof(long), 18, 0);
+    msgrcv(bridge, &groupBusinessMembers, sizeof(groupBusinessMembers) - sizeof(long), 19, 0);
+
+    printf("Users signed in to Sport group: \n");
+    printf("%s", groupSportMembers.login);
+    printf("Users signed in to Politics group: \n");
+    printf("%s", groupPoliticsMembers.login);
+    printf("Users signed in to Business group: \n");
+    printf("%s", groupBusinessMembers.login);
 }
 
 

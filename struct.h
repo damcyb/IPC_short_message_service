@@ -31,7 +31,8 @@ typedef struct User User;
 
 struct LoggedUsers {
     long type;
-    char login[NUMBER_OF_USERS][50];
+    //char login[NUMBER_OF_USERS][50];
+    char login[900];
     int number;
 };
 typedef struct LoggedUsers LoggedUsers;
@@ -46,7 +47,8 @@ typedef struct Group Group;
 
 struct ExistingGroups {
     long type;
-    char name[NUMBER_OF_GROUPS][50];
+    //char name[NUMBER_OF_GROUPS][50];
+    char name[150];
 };
 typedef struct ExistingGroups ExistingGroups;
 
@@ -64,7 +66,7 @@ typedef struct SignOutFromGroupStatus SignOutFromGroupStatus;
 
 struct GroupMembers {
     long type;
-    char login[NUMBER_OF_USERS][250];
+    char login[900];
     int number;
 };
 typedef struct GroupMembers GroupMembers;
