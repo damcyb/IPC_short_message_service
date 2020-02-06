@@ -60,7 +60,7 @@ int main() {
             else if(!strcmp(keyboardInput, "5")) {
                 signOutFromGroupRequest();
             }
-            
+
             else if(!strcmp(keyboardInput, "6")) {
                 writeMessageToUser();
             }
@@ -69,6 +69,8 @@ int main() {
                 logoutUserRequest();
             }
         }
+        sleep(1);
+        readMessageRequest();
     }
 
 

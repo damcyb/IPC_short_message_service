@@ -32,6 +32,8 @@ int main() {
     queue[1] = receive_queue;
     queue[2] = send_queue;
 
+    createIndividualQueues();
+
     signal(2, closeQueues);
 
     readUserDataFromFile();

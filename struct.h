@@ -4,12 +4,14 @@
 #define STRUCT_H
 
 #define MESSAGE_MAX_LENGTH 1000
-#define NUMBER_OF_USERS 3
+#define NUMBER_OF_USERS 9
 #define NUMBER_OF_GROUPS 3
 
 struct Message {
     long type;
     char text[MESSAGE_MAX_LENGTH];
+    char senderLogin[100];
+    int receiverId;
 };
 typedef struct Message Message;
 

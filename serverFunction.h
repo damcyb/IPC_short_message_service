@@ -15,21 +15,29 @@
 #ifndef SERVER_FUNCTION_H
 #define SERVER_FUNCTION_H
 
-#define NUMBER_OF_USERS 3
+#define NUMBER_OF_USERS 9
 #define NUMBER_OF_GROUPS 3
 
 User users[NUMBER_OF_USERS];
 Group groups[NUMBER_OF_GROUPS];
+int individualQueues[NUMBER_OF_USERS];
 
 void closeQueues(int signal) {
     for (int i = 0; i < 3; i++) {
         msgctl(queue[i], IPC_RMID, NULL);
     }
-//    for (int i = 0; i < 16; i++) {
-//        int mid = msgget(0x200 + i, 0);
-//        msgctl(mid, IPC_RMID, NULL);
-//    }
+    for (int i = 0; i < NUMBER_OF_USERS; i++) {
+        int tmp = msgget(0x203 + i, 0);
+        msgctl(tmp, IPC_RMID, NULL);
+    }
     exit(0);
+}
+
+void createIndividualQueues() {
+    for(int i = 0; i < NUMBER_OF_USERS; i++) {
+        individualQueues[i] = msgget(0x203 + i, 0666 | IPC_CREAT);
+        printf("%d\n", individualQueues[i]);
+    }
 }
 
 int validateLogin(User user) {
@@ -359,6 +367,7 @@ void userToUserValidator() {
 
 void userToUserMessage() {
     int internalReceive_Queue = msgget(0x201, 0666);
+    int internalSend_Queue = msgget(0x202, 0666);
     Message message;
     int receivedMessage = msgrcv(internalReceive_Queue, &message, sizeof(message) - sizeof(long), 26, IPC_NOWAIT);
     if(receivedMessage == -1) {
@@ -366,6 +375,12 @@ void userToUserMessage() {
     }
     else {
         printf("%s\n", message.text);
+        Message copyMessage;
+        copyMessage.type = 27;
+        strcpy(copyMessage.senderLogin, message.senderLogin);
+        strcpy(copyMessage.text, message.text);
+        printf("%d\n", individualQueues[message.receiverId - 1]);
+        msgsnd(individualQueues[message.receiverId - 1], &copyMessage, sizeof(copyMessage) - sizeof(long), 0);
     }
 }
 

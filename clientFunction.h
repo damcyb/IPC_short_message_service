@@ -15,10 +15,11 @@
 #ifndef SERVER_FUNCTION_H
 #define SERVER_FUNCTION_H
 
-#define NUMBER_OF_USERS 3
+#define NUMBER_OF_USERS 9
 #define NUMBER_OF_GROUPS 3
 
 User user;
+int receiverId;
 
 void showOptions() {
     printf("Enter a number to do something: \n"
@@ -46,6 +47,7 @@ LoginUserDetailsRequestModel inputLoginData() {
 
 void loginUserRequest(LoginUserDetailsRequestModel loginUserDetails) {
 
+
     int bridge = msgget(0x200, 0666);
     loginUserDetails.type = 2;
     msgsnd(bridge, &loginUserDetails, sizeof(LoginUserDetailsRequestModel) - sizeof(long), 0);
@@ -57,6 +59,7 @@ void loginUserRequest(LoginUserDetailsRequestModel loginUserDetails) {
     }
     if(user.logStatus == 1) {
         printf("Login successful, welcome back %s \n", user.login);
+        //individualKey = 0x200 + user.id;
     }
     else {
         printf("Login unsuccessful, validate input data \n");
@@ -236,6 +239,7 @@ void writeMessageToUser() {
         sleep(1);
         if(userFoundResponse.isFound == 1) {
             printf("Found\n");
+            receiverId = userFoundResponse.id;
         }
         else if(userFoundResponse.isFound == 0) {
             printf("Writing messages to yourself is unavailable\n");
@@ -247,17 +251,24 @@ void writeMessageToUser() {
     if(userFoundResponse.isFound == 1) {
         Message message;
         message.type = 26;
+        strcpy(message.senderLogin, user.login);
+        message.receiverId = receiverId;
         printf("Type your message to %s, when you want to exit writing mode type \"quit\" and press enter \n", receiver.login);
-        strcpy(message.text, "");
-        while(strcmp(message.text, "quit")) {
-            scanf("%s", message.text);
-            msgsnd(msgBridge, &message, sizeof(message) - sizeof(long), 0);
-        }
+        scanf("%[^\n]%*c", message.text);
+        msgsnd(msgBridge, &message, sizeof(message) - sizeof(long), 0);
     }
-
 }
 
-
-
+void readMessageRequest() {
+    int msgBridge = msgget(0x202 + user.id, 0);
+    Message message;
+    int receivedMessage = msgrcv(msgBridge, &message, sizeof(message) - sizeof(long), 27, IPC_NOWAIT);
+    if(receivedMessage == -1) {
+        //perror("Error: ");
+    }
+    else {
+        printf("%s: %s\n", message.senderLogin, message.text);
+    }
+}
 
 #endif
