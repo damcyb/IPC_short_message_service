@@ -47,7 +47,6 @@ LoginUserDetailsRequestModel inputLoginData() {
 
 void loginUserRequest(LoginUserDetailsRequestModel loginUserDetails) {
 
-
     int bridge = msgget(0x200, 0666);
     loginUserDetails.type = 2;
     msgsnd(bridge, &loginUserDetails, sizeof(LoginUserDetailsRequestModel) - sizeof(long), 0);
@@ -221,7 +220,7 @@ void logoutUserRequest() {
     }
 }
 
-void writeMessageToUser() {
+void writeMessageToUserRequest() {
     int bridge = msgget(0x200, 0);
     int msgBridge = msgget(0x201, 0);
     user.type = 22;
@@ -249,12 +248,14 @@ void writeMessageToUser() {
         }
     }
     if(userFoundResponse.isFound == 1) {
+        char text[1024];
         Message message;
         message.type = 26;
         strcpy(message.senderLogin, user.login);
         message.receiverId = receiverId;
-        printf("Type your message to %s, when you want to exit writing mode type \"quit\" and press enter \n", receiver.login);
-        scanf("%[^\n]%*c", message.text);
+        printf("Type your message to %s, when you want to exit writing mode type #@ and press enter \n", receiver.login);
+        scanf("%[^#@]s", text);
+        strcpy(message.text, text);
         msgsnd(msgBridge, &message, sizeof(message) - sizeof(long), 0);
     }
 }
@@ -262,12 +263,49 @@ void writeMessageToUser() {
 void readMessageRequest() {
     int msgBridge = msgget(0x202 + user.id, 0);
     Message message;
-    int receivedMessage = msgrcv(msgBridge, &message, sizeof(message) - sizeof(long), 27, IPC_NOWAIT);
+    int receivedMessage = msgrcv(msgBridge, &message, sizeof(message) - sizeof(long), 27, IPC_NOWAIT);;
     if(receivedMessage == -1) {
-        //perror("Error: ");
+        perror("Error: ");
     }
     else {
         printf("%s: %s\n", message.senderLogin, message.text);
+    }
+}
+
+void writeMessageToGroupRequest() {
+    int bridge = msgget(0x200, 0);
+    int msgBridge = msgget(0x201, 0);
+    user.type = 28;
+    Group receiverGroup;
+    receiverGroup.type = 29;
+    msgsnd(bridge, &user, sizeof(user) - sizeof(long), 0);
+
+    GroupFoundResponse groupFoundResponse;
+    groupFoundResponse.isFound = 0;
+    while (groupFoundResponse.isFound <= 0) {
+        printf("Type receiver group name: \n");
+        scanf("%s", receiverGroup.name);
+        msgsnd(bridge, &receiverGroup, sizeof(receiverGroup) - sizeof(long), 0);
+        int received = msgrcv(bridge, &groupFoundResponse, sizeof(groupFoundResponse) - sizeof(long), 30, 0);
+        sleep(1);
+        if(groupFoundResponse.isFound == 1) {
+            printf("Found\n");
+            receiverId = groupFoundResponse.id;
+        }
+        else {
+            printf("Not found\n");
+        }
+    }
+    if(groupFoundResponse.isFound == 1) {
+        char text[1024];
+        Message message;
+        message.type = 31;
+        strcpy(message.senderLogin, user.login);
+        message.receiverId = receiverId;
+        printf("Type your message to %s group, when you want to exit writing mode type #@ and press enter \n", receiverGroup.name);
+        scanf("%[^#@]s", text);
+        strcpy(message.text, text);
+        msgsnd(msgBridge, &message, sizeof(message) - sizeof(long), 0);
     }
 }
 

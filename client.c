@@ -62,7 +62,15 @@ int main() {
             }
 
             else if(!strcmp(keyboardInput, "6")) {
-                writeMessageToUser();
+                writeMessageToUserRequest();
+            }
+
+            else if(!strcmp(keyboardInput, "7")) {
+                writeMessageToGroupRequest();
+            }
+
+            else if(!strcmp(keyboardInput, "8")) {
+                readMessageRequest();
             }
 
             else if(!strcmp(keyboardInput, "9")) {
@@ -70,7 +78,6 @@ int main() {
             }
         }
         sleep(1);
-        readMessageRequest();
     }
 
 

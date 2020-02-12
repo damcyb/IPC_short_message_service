@@ -78,6 +78,13 @@ struct UserFoundResponse {
 };
 typedef struct UserFoundResponse UserFoundResponse;
 
+struct GroupFoundResponse {
+    long type;
+    int isFound;
+    int id;
+};
+typedef struct GroupFoundResponse GroupFoundResponse;
+
 struct pollfd clientPoll = {
         STDIN_FILENO,
         POLLIN | POLLPRI

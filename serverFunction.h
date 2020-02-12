@@ -375,12 +375,78 @@ void userToUserMessage() {
     }
     else {
         printf("%s\n", message.text);
-        Message copyMessage;
-        copyMessage.type = 27;
-        strcpy(copyMessage.senderLogin, message.senderLogin);
-        strcpy(copyMessage.text, message.text);
-        printf("%d\n", individualQueues[message.receiverId - 1]);
-        msgsnd(individualQueues[message.receiverId - 1], &copyMessage, sizeof(copyMessage) - sizeof(long), 0);
+        message.type = 27;
+        msgsnd(individualQueues[message.receiverId - 1], &message, sizeof(message) - sizeof(long), 0);
+    }
+}
+
+int validateReceiverGroup(User sender, Group receiverGroup) {
+
+    for(int i = 0; i < NUMBER_OF_GROUPS; i++) {
+        if(!strcmp(receiverGroup.name, groups[i].name)) {
+            return groups[i].id;
+        }
+    }
+    return -1;
+}
+
+void userToGroupValidator() {
+    User sender;
+    Group receiverGroup;
+    int internalRequestQueue = msgget(0x200, 0666);
+    int receivedSenderData = msgrcv(internalRequestQueue, &sender, sizeof(sender) - sizeof(long), 28, IPC_NOWAIT);
+    if(receivedSenderData == -1) {
+        //perror("Error: ");
+    }
+    int receivedUserRequest  = msgrcv(internalRequestQueue, &receiverGroup, sizeof(receiverGroup) - sizeof(long), 29, IPC_NOWAIT);
+    if(receivedUserRequest == -1) {
+        //perror("Error: ");
+    }
+    else {
+        GroupFoundResponse groupFoundResponse;
+        groupFoundResponse.type = 30;
+        int validationCode = validateReceiverGroup(sender, receiverGroup);
+        if(validationCode > 0) {
+            groupFoundResponse.isFound = 1;
+            groupFoundResponse.id = validationCode;
+            printf("Successful request\n");
+        }
+//        else if(validationCode == 0) {
+//            groupFoundResponse.isFound = 0;
+//            groupFoundResponse.id = -1;
+//            printf("Unsuccessful request\n");
+//        }
+        else {
+            groupFoundResponse.isFound = -1;
+            groupFoundResponse.id = -1;
+            printf("Unsuccessful request\n");
+        }
+        msgsnd(internalRequestQueue, &groupFoundResponse, sizeof(groupFoundResponse) - sizeof(long), 0);
+    }
+}
+
+void userToGroupMessage() {
+    int internalReceive_Queue = msgget(0x201, 0666);
+    int internalSend_Queue = msgget(0x202, 0666);
+    Message message;
+    int receivedMessage = msgrcv(internalReceive_Queue, &message, sizeof(message) - sizeof(long), 31, IPC_NOWAIT);
+    if(receivedMessage == -1) {
+        //perror("Error: ");
+    }
+    else {
+        printf("%s\n", message.text);
+        message.type = 27;
+        for(int i = 0; i < NUMBER_OF_GROUPS; i++) {
+            if(message.receiverId == groups[i].id) {
+                for(int j = 0; j < NUMBER_OF_USERS; j++) {
+                    if(groups[i].members[j] == 1 && strcmp(users[j].login, message.senderLogin)) {
+                        printf("ID: %d\n", individualQueues[j]);
+                        msgsnd(individualQueues[j], &message, sizeof(message) - sizeof(long), 0);
+                    }
+                }
+                break;
+            }
+        }
     }
 }
 
@@ -396,11 +462,11 @@ void readUserDataFromFile() {
 }
 
 void readGroups() {
-    groups[0].id = 1;
+    groups[0].id = 11;
     strcpy(groups[0].name, "Sport");
-    groups[1].id = 2;
+    groups[1].id = 12;
     strcpy(groups[1].name, "Politics");
-    groups[2].id = 3;
+    groups[2].id = 13;
     strcpy(groups[2].name, "Business");
 }
 

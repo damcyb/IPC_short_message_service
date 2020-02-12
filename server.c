@@ -48,6 +48,8 @@ int main() {
         showUsersInGroup();
         userToUserValidator();
         userToUserMessage();
+        userToGroupValidator();
+        userToGroupMessage();
         logoutUser();
         sleep(1);
     }
