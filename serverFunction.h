@@ -42,9 +42,12 @@ void createIndividualQueues() {
 
 int validateLogin(User user) {
     for(int i = 0; i < NUMBER_OF_USERS; i++) {
-        if(!strcmp(user.login, users[i].login) && !strcmp(user.password, users[i].password)) {
+        if(!strcmp(user.login, users[i].login) && !strcmp(user.password, users[i].password) && users[i].logStatus != 1) {
             users[i].logStatus = 1;
             return users[i].id;
+        }
+        else if(!strcmp(user.login, users[i].login) && !strcmp(user.password, users[i].password) && users[i].logStatus == 1) {
+            return -2;
         }
     }
     return -1;
@@ -65,17 +68,20 @@ void loginUser() {
         strcpy(user.login, loginUserDetailsRequestModel.login);
         strcpy(user.password, loginUserDetailsRequestModel.password);
         user.type = 3;
-        printf("User login: %s\n", user.login);
-        printf("User password: %s\n", user.password);
         int validationCode = validateLogin(user);
-        if(validationCode != -1) {
+        if(validationCode >= 0) {
             user.logStatus = 1;
             user.id = validationCode;
+            printf("Login successful\n");
             printf("User id: %d\n", user.id);
         }
-        else {
+        else if(validationCode == -1) {
             user.logStatus = 0;
             printf("Login unsuccessful \n");
+        }
+        else {
+            printf("Login unsuccessful \n");
+            user.logStatus = -1;
         }
         msgsnd(internalRequestQueue, &user, sizeof(user) - sizeof(long), 0);
     }
@@ -434,13 +440,14 @@ void userToGroupMessage() {
         //perror("Error: ");
     }
     else {
-        printf("%s\n", message.text);
+        //printf("%s\n", message.text);
+        printf("Message sent.\n");
         message.type = 27;
         for(int i = 0; i < NUMBER_OF_GROUPS; i++) {
             if(message.receiverId == groups[i].id) {
                 for(int j = 0; j < NUMBER_OF_USERS; j++) {
                     if(groups[i].members[j] == 1 && strcmp(users[j].login, message.senderLogin)) {
-                        printf("ID: %d\n", individualQueues[j]);
+                        //printf("ID: %d\n", individualQueues[j]);
                         msgsnd(individualQueues[j], &message, sizeof(message) - sizeof(long), 0);
                     }
                 }

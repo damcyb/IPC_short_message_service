@@ -23,6 +23,7 @@ int receiverId;
 
 void showOptions() {
     printf("Enter a number to do something: \n"
+           "0 - SHOW POSSIBLE ACTIONS PANEL\n"
            "1 - SHOW LIST OF LOGGED USERS\n"
            "2 - SHOW LIST OF USERS IN GROUPS\n"
            "3 - SHOW LIST OF GROUPS\n"
@@ -30,7 +31,7 @@ void showOptions() {
            "5 - SIGN OUT FROM GROUP\n"
            "6 - SEND A MESSAGE TO USER\n"
            "7 - SEND A MESSAGE TO GROUP\n"
-           "8 - READ MESSAGES\n"
+           "8 - READ MESSAGE\n"
            "9 - LOGOUT\n");
 }
 
@@ -50,15 +51,15 @@ void loginUserRequest(LoginUserDetailsRequestModel loginUserDetails) {
     int bridge = msgget(0x200, 0666);
     loginUserDetails.type = 2;
     msgsnd(bridge, &loginUserDetails, sizeof(LoginUserDetailsRequestModel) - sizeof(long), 0);
-//    sleep(1);
-    //User user;
     int received = msgrcv(bridge, &user, sizeof(user) - sizeof(long), 3, 0);
     if(received == -1) {
         perror("Error: ");
     }
-    if(user.logStatus == 1) {
+    if(user.logStatus == 1 && user.id != -2) {
         printf("Login successful, welcome back %s \n", user.login);
-        //individualKey = 0x200 + user.id;
+    }
+    else if(user.logStatus == -1) {
+        printf("Login unsuccessful, user has already logged in \n");
     }
     else {
         printf("Login unsuccessful, validate input data \n");
@@ -67,9 +68,7 @@ void loginUserRequest(LoginUserDetailsRequestModel loginUserDetails) {
 
 void showLoggedUsersRequest() {
     int bridge = msgget(0x200, 0);
-
     user.type = 4;
-
     msgsnd(bridge, &user, sizeof(user) - sizeof(long), 0);
     sleep(1);
     LoggedUsers loggedUsers;
@@ -110,7 +109,15 @@ void showGroupInfo() {
 
 int chooseAction() {
     int chosenGroup;
-    scanf("%d", &chosenGroup);
+    int correctInput = 0;
+    while(correctInput <= 0) {
+        correctInput = scanf("%d", &chosenGroup);
+        if(correctInput <= 0) {
+            char dummy;
+            scanf("%s", &dummy);
+            printf("Bad input, try again\n");
+        }
+    }
     return chosenGroup;
 }
 
@@ -139,7 +146,7 @@ void signInToGroupRequest() {
             printf("Success, now you are a member of chosen group\n");
         }
         else {
-            printf("Failure, you have already been a member of chosen group\n");
+            printf("Failure, you have already been a member of chosen group or bad group name was typed\n");
         }
     }
 }
@@ -169,7 +176,7 @@ void signOutFromGroupRequest() {
             printf("Success, you signed out from chosen group\n");
         }
         else {
-            printf("Failure, you have already been out of chosen group\n");
+            printf("Failure, you have already been a member of chosen group or bad group name was typed\n");
         }
     }
 }
@@ -257,6 +264,8 @@ void writeMessageToUserRequest() {
         scanf("%[^#@]s", text);
         strcpy(message.text, text);
         msgsnd(msgBridge, &message, sizeof(message) - sizeof(long), 0);
+        char dummy;
+        scanf("%s", &dummy);
     }
 }
 
@@ -306,6 +315,8 @@ void writeMessageToGroupRequest() {
         scanf("%[^#@]s", text);
         strcpy(message.text, text);
         msgsnd(msgBridge, &message, sizeof(message) - sizeof(long), 0);
+        char dummy;
+        scanf("%s", &dummy);
     }
 }
 
