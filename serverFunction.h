@@ -36,7 +36,6 @@ void closeQueues(int signal) {
 void createIndividualQueues() {
     for(int i = 0; i < NUMBER_OF_USERS; i++) {
         individualQueues[i] = msgget(0x203 + i, 0666 | IPC_CREAT);
-        printf("%d\n", individualQueues[i]);
     }
 }
 
@@ -417,11 +416,6 @@ void userToGroupValidator() {
             groupFoundResponse.id = validationCode;
             printf("Successful request\n");
         }
-//        else if(validationCode == 0) {
-//            groupFoundResponse.isFound = 0;
-//            groupFoundResponse.id = -1;
-//            printf("Unsuccessful request\n");
-//        }
         else {
             groupFoundResponse.isFound = -1;
             groupFoundResponse.id = -1;
@@ -447,7 +441,6 @@ void userToGroupMessage() {
             if(message.receiverId == groups[i].id) {
                 for(int j = 0; j < NUMBER_OF_USERS; j++) {
                     if(groups[i].members[j] == 1 && strcmp(users[j].login, message.senderLogin)) {
-                        //printf("ID: %d\n", individualQueues[j]);
                         msgsnd(individualQueues[j], &message, sizeof(message) - sizeof(long), 0);
                     }
                 }

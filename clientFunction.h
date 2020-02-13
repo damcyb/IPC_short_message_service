@@ -176,7 +176,7 @@ void signOutFromGroupRequest() {
             printf("Success, you signed out from chosen group\n");
         }
         else {
-            printf("Failure, you have already been a member of chosen group or bad group name was typed\n");
+            printf("Failure, you are not a member of chosen group or bad group name was typed\n");
         }
     }
 }
@@ -274,7 +274,7 @@ void readMessageRequest() {
     Message message;
     int receivedMessage = msgrcv(msgBridge, &message, sizeof(message) - sizeof(long), 27, IPC_NOWAIT);;
     if(receivedMessage == -1) {
-        perror("Error: ");
+        printf("No new messages\n");
     }
     else {
         printf("%s: %s\n", message.senderLogin, message.text);
