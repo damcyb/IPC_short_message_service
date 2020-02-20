@@ -7,7 +7,7 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include "struct.h"
-#include "clientFunction.h"
+#include "inf120573_clientFunction.h"
 
 #define True 1
 #define False 0

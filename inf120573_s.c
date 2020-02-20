@@ -14,8 +14,8 @@ int receive_queue;
 int send_queue;
 int queue[3];
 
-#include "struct.h"
-#include "serverFunction.h"
+#include "inf120573_struct.h"
+#include "inf120573_serverFunction.h"
 
 #define True 1
 #define False 0

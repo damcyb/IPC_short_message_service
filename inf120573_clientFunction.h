@@ -10,7 +10,7 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <stdlib.h>
-#include "struct.h"
+#include "inf120573_struct.h"
 
 #ifndef SERVER_FUNCTION_H
 #define SERVER_FUNCTION_H

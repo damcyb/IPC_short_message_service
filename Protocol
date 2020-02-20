@@ -1,0 +1,38 @@
+PROTOCOL
+
+pattern:  queue address.type - from -> to : action
+
+queue 0x200 - kolejka do przesylania zadan / komunikacji client -> server
+    .2 - client -> server: login request
+    .3 - server -> client: login response
+    .4 - client -> server: show logged users request
+    .5 - server -> client: show logged users response
+    .6 - client -> server: show list of group request
+    .7 - server -> client: show list of group response
+    .8 - client -> server: sign in to group (user data) request
+    .10 - client -> server sign in to group (chosen group data) request
+    .11 - server -> client sign in to group response
+    .12 - client -> server: sign out from group (user data) request
+    .14 - client -> server: sign out from group (chosen group data) request
+    .15 - server -> client: sign out from group response
+    .16 - client -> server: show users in groups request
+    .17 - server -> client: show users in Sport group response
+    .18 - server -> client: show users in Politics group response
+    .19 - server -> client: show users in Business group response
+    .20 - client -> server: logout user request
+    .21 - server -> client: logout user response
+    .22 - client -> server: write message to user (sender data) request
+    .24 - client -> server: write message to user (receiver data) request
+    .25 - server -> client: write message to user (is action possible?) response
+    .28 - client -> server: write message to group (sender data) request
+    .29 - client -> server: write message to group (receiver group data) request
+    .30 - server -> client: write message to group (is action possible?) response
+
+queue 0x201 - kolejka do przesylania wiadomosci od uzytkownikow client -> server
+    .26 - client -> server: write message to user (message text) request
+    .31 - server -> client: write message to group (message text) request
+
+queue 0x202 - kolejka do przesylania wiadomosci do uzytkownikow server -> client
+
+queue 0x202 + userId - kolejki prywatne uzytkownikow, na ktore server wysyla wiadomosci
+    .27 server -> client: read message response
